@@ -30,6 +30,8 @@ object TestServer extends App {
     get {
       path("") {
         complete(index)
+      } ~ pathPrefix("static") {
+        getFromResourceDirectory("static/")
       } ~
         path("secure") {
           HttpBasicAuthentication("My very secure site")(auth) { user ⇒
@@ -41,13 +43,15 @@ object TestServer extends App {
         } ~
         path("crash") {
           complete(sys.error("BOOM!"))
+        } ~
+        path("shutdown") {
+          shutdown
+          complete("SHUTDOWN")
         }
+      }
     }
-  }
 
-  println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
-  Console.readLine()
-  binding.unbind(materializedMap).onComplete(_ ⇒ system.shutdown())
+  def shutdown(): Unit = binding.unbind(materializedMap).onComplete(_ ⇒ system.shutdown())
 
   lazy val index =
     <html>
@@ -56,8 +60,10 @@ object TestServer extends App {
         <p>Defined resources:</p>
         <ul>
           <li><a href="/ping">/ping</a></li>
+          <li><a href="/static/index.html">/static/index.html</a> - serving static content from the src/main/resources</li>
           <li><a href="/secure">/secure</a> Use any username and '&lt;username&gt;-password' as credentials</li>
           <li><a href="/crash">/crash</a></li>
+          <li><a href="/shutdown">/shutdown</a> - never do this in production :-)</li>
         </ul>
       </body>
     </html>
