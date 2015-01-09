@@ -5,9 +5,10 @@ import com.typesafe.config.{ ConfigFactory, Config }
 import akka.stream.FlowMaterializer
 import akka.actor.ActorSystem
 import akka.pattern._
+import akka.stream.scaladsl.Flow
 import akka.http.Http
 import akka.http.server._
-import akka.http.model.StatusCodes
+import akka.http.model.{HttpResponse, HttpRequest, StatusCodes}
 import akka.http.server.directives.AuthenticationDirectives._
 import scala.concurrent.duration._
 import akka.util.Timeout
@@ -50,7 +51,7 @@ object TestServer extends App {
 
   val binding = Http().bind(interface = "localhost", port = 8080)
 
-  val materializedMap = binding startHandlingWith {
+  val materializedMap = binding startHandlingWith Route.handlerFlow {
     get {
       path("") {
         redirect("web/webui/0.0.1/index.html", StatusCodes.Found)
