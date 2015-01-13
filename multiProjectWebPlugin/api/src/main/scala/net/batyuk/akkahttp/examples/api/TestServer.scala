@@ -54,9 +54,9 @@ object TestServer extends App {
   val materializedMap = binding startHandlingWith Route.handlerFlow {
     get {
       path("") {
-        redirect("web/webui/0.0.1/index.html", StatusCodes.Found)
+        redirect("web/index.html", StatusCodes.Found)
       } ~ pathPrefix("web") {
-        getFromResourceDirectory("META-INF/resources/webjars/")
+        getFromResourceDirectory(".")
       } ~
         path("secure") {
           HttpBasicAuthentication("My very secure site")(auth) { user ⇒

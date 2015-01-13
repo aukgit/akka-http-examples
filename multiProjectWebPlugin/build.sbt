@@ -28,6 +28,7 @@ lazy val webui = (project in file("webui"))
   )
   .settings(JsEngineKeys.engineType := JsEngineKeys.EngineType.Node)
   .settings((managedClasspath in Runtime) += (packageBin in Assets).value)
+  .settings(pipelineStages := Seq(rjs))
 
 lazy val api = (project in file("api"))
   .settings(commonSettings: _*)
@@ -40,8 +41,11 @@ lazy val api = (project in file("api"))
       "com.typesafe.akka" %% "akka-http-xml-experimental" % "1.0-M2",
       "com.typesafe.akka" %% "akka-http-spray-json-experimental" % "1.0-M2",
       "io.spray" %%  "spray-json" % "1.3.1"
-    )
+    ),
+    (managedClasspath in Runtime) += (WebKeys.stagingDirectory in webui).value
+
   )
+  .settings(Revolver.reStart <<= Revolver.reStart.dependsOn(WebKeys.stage in webui in Assets))
   .dependsOn(webui % "compile;test->test;runtime", model, core)
 
 
